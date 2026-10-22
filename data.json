@@ -1,0 +1,40 @@
+{
+  "last_updated": "22 Oct 2026, 13:45 IST",
+  "featured_review": {
+    "product_name": "AMD Ryzen 7 9800X3D vs Core Ultra 9",
+    "consensus_score": 9.3,
+    "verdict_summary": "Reviewers agree the 9800X3D crushes gaming frame rates with incredible thermal efficiency, while Intel struggles to justify its price for dedicated gaming rigs.",
+    "benchmarks": [
+      { "metric": "1080p Gaming FPS", "score": 98 },
+      { "metric": "Power Efficiency", "score": 91 },
+      { "metric": "Productivity Render", "score": 85 },
+      { "metric": "Value for Money", "score": 89 }
+    ],
+    "pros": [
+      "Massive 1% low frame rate stability",
+      "Significantly easier to cool than previous gen",
+      "AM5 socket backwards compatibility"
+    ],
+    "cons": [
+      "Frequent retail price inflation above MSRP",
+      "Pure multicore rendering trails Intel flagships"
+    ]
+  },
+  "live_news": [
+    {
+      "category": "PC Hardware",
+      "headline": "8GB VRAM Cards Are Officially Hitting Their Limits",
+      "hot_take": "Buying an 8GB card for modern 1080p/1440p gaming now means compromising texture quality immediately."
+    },
+    {
+      "category": "Smartphones",
+      "headline": "Flagship Features Keep Vanishing from Budget Tiers",
+      "hot_take": "Removing basic essentials like headphone jacks and chargers from sub-₹20k phones is pure profit margin shaving."
+    },
+    {
+      "category": "Audio Gear",
+      "headline": "Compact 2.4GHz Wireless Lavs Dominate Creator Setups",
+      "hot_take": "Proper mic placement beats spending ₹30,000 on studio broadcast gear for everyday video recording."
+    }
+  ]
+}
