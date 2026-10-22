@@ -45,13 +45,15 @@
         .search-bar { width: 100%; background: var(--card-bg); border: 1px solid var(--border); padding: 14px 18px; border-radius: var(--radius); color: var(--text); font-size: 0.95rem; outline: none; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
         .search-bar:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
 
-        /* Article Card */
-        .article-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); }
+        /* Section Headings */
+        h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 12px; letter-spacing: -0.3px; color: var(--text-dim); text-transform: uppercase; }
+
+        /* Dynamic Article / Featured Review Card */
+        .article-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); display: none; }
+        .article-card.active { display: block; }
         .article-tag { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.2px; color: var(--accent); font-weight: 700; margin-bottom: 8px; display: block; }
         .article-title { font-size: 1.8rem; font-weight: 800; line-height: 1.25; margin-bottom: 12px; letter-spacing: -0.5px; }
-        
         .article-meta { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 14px; margin-bottom: 20px; font-size: 0.8rem; color: var(--text-dim); }
-        
         .article-body { font-size: 1.05rem; line-height: 1.7; color: var(--text); margin-bottom: 20px; }
         .quote-box { background: var(--accent-glow); border-left: 3px solid var(--accent); padding: 14px 18px; border-radius: 0 12px 12px 0; font-style: italic; font-size: 0.95rem; margin-bottom: 20px; }
 
@@ -68,9 +70,6 @@
         .pros li::before { content: "+"; position: absolute; left: 0; color: #10b981; font-weight: bold; }
         .cons li::before { content: "-"; position: absolute; left: 0; color: #ef4444; font-weight: bold; }
 
-        /* Section Headings */
-        h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 12px; letter-spacing: -0.3px; color: var(--text-dim); text-transform: uppercase; }
-
         /* News Grid */
         .news-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
         .news-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; display: flex; flex-direction: column; justify-content: space-between; text-decoration: none; color: inherit; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
@@ -79,11 +78,11 @@
         .news-headline { font-size: 0.95rem; font-weight: 700; margin-bottom: 10px; line-height: 1.35; }
         .news-take { font-size: 0.8rem; color: var(--text-dim); border-top: 1px solid var(--border); padding-top: 8px; }
 
-        /* Video Watchlist */
+        /* Video Playlist Feed */
         .video-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
         .video-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; display: flex; align-items: center; gap: 14px; text-decoration: none; color: inherit; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
         .video-card:hover { border-color: var(--accent); transform: translateY(-2px); transition: transform 0.2s ease, border-color 0.2s ease; }
-        .video-icon { font-size: 1rem; background: var(--bg); padding: 12px; border-radius: 12px; border: 1px solid var(--border); font-weight: bold; color: var(--accent); }
+        .video-index { font-size: 0.85rem; background: var(--bg); padding: 10px 14px; border-radius: 12px; border: 1px solid var(--border); font-weight: bold; color: var(--accent); min-width: 40px; text-align: center; }
         .video-info h4 { font-size: 0.9rem; font-weight: 700; margin-bottom: 2px; }
         .video-info p { font-size: 0.75rem; color: var(--text-dim); }
 
@@ -105,37 +104,37 @@
     </header>
 
     <main>
-        <!-- Search Bar -->
+        <!-- Search Bar with On-Demand Generation -->
         <div class="search-container">
-            <input type="text" id="searchInput" class="search-bar" placeholder="Search insights and headlines..." onkeyup="filterContent()">
+            <input type="text" id="searchInput" class="search-bar" placeholder="Search insights or type a topic and press Enter to generate..." onkeydown="handleSearch(event)">
         </div>
 
-        <!-- Featured Review / Article -->
-        <section class="article-card" id="featuredSection">
-            <span class="article-tag">Deep Dive Editorial</span>
-            <h1 class="article-title" id="rev-title">Loading editorial...</h1>
+        <!-- Featured / On-Demand Article Display Area -->
+        <section class="article-card" id="articleSection">
+            <span class="article-tag" id="art-tag">Deep Dive Editorial</span>
+            <h1 class="article-title" id="art-title"></h1>
             <div class="article-meta">
-                <span id="rev-author">Editorial Board</span>
-                <span id="rev-score" style="font-weight: 700; color: var(--accent);">Score: --/10</span>
+                <span id="art-author">Editorial Board</span>
+                <span id="art-score" style="font-weight: 700; color: var(--accent);"></span>
             </div>
-            <div class="article-body" id="rev-summary">Fetching breakdown...</div>
-            <div class="quote-box" id="rev-quote">"..."</div>
+            <div class="article-body" id="art-summary"></div>
+            <div class="quote-box" id="art-quote"></div>
             
-            <div class="benchmarks-grid" id="rev-benchmarks"></div>
+            <div class="benchmarks-grid" id="art-benchmarks"></div>
             
             <div class="pros-cons">
                 <div>
                     <div class="list-title" style="color: #10b981;">Advantages</div>
-                    <ul class="pros" id="rev-pros"></ul>
+                    <ul class="pros" id="art-pros"></ul>
                 </div>
                 <div>
                     <div class="list-title" style="color: #ef4444;">Limitations</div>
-                    <ul class="cons" id="rev-cons"></ul>
+                    <ul class="cons" id="art-cons"></ul>
                 </div>
             </div>
         </section>
 
-        <!-- Live News -->
+        <!-- Live News Briefings -->
         <section>
             <h2>Live Tech Briefings</h2>
             <div class="news-grid" id="news-container">
@@ -143,9 +142,9 @@
             </div>
         </section>
 
-        <!-- Video Watchlist -->
+        <!-- Video Playlist -->
         <section>
-            <h2>Curated Watchlist</h2>
+            <h2>Curated Playlist</h2>
             <div class="video-grid" id="video-container">
                 <!-- Dynamically populated -->
             </div>
@@ -187,24 +186,40 @@
         function renderUI(data) {
             document.getElementById('last-updated').textContent = 'Synced: ' + data.last_updated;
 
-            const rev = data.featured_review;
-            document.getElementById('rev-title').textContent = rev.product_name;
-            document.getElementById('rev-score').textContent = `Score: ${rev.consensus_score} / 10`;
-            document.getElementById('rev-summary').textContent = rev.verdict_summary;
-            document.getElementById('rev-quote').textContent = `"${rev.youtuber_quote}"`;
-
-            document.getElementById('rev-benchmarks').innerHTML = rev.benchmarks.map(b => `
-                <div class="benchmark-item">
-                    <div class="benchmark-label">${b.metric}</div>
-                    <div class="benchmark-val">${b.score} / 100</div>
-                </div>
-            `).join('');
-
-            document.getElementById('rev-pros').innerHTML = rev.pros.map(p => `<li>${p}</li>`).join('');
-            document.getElementById('rev-cons').innerHTML = rev.cons.map(c => `<li>${c}</li>`).join('');
+            // Render default featured story if available
+            if (data.featured_stories && data.featured_stories.length > 0) {
+                renderArticle(data.featured_stories[0]);
+            }
 
             renderNews(data.live_news);
-            renderVideos(data.video_suggestions);
+            renderPlaylist(data.video_playlist);
+        }
+
+        function renderArticle(art) {
+            const card = document.getElementById('articleSection');
+            card.classList.add('active');
+
+            document.getElementById('art-tag').textContent = art.tag || 'Deep Dive Editorial';
+            document.getElementById('art-title').textContent = art.title || art.query;
+            document.getElementById('art-score').textContent = art.consensus_score ? `Score: ${art.consensus_score} / 10` : '';
+            document.getElementById('art-summary').textContent = art.summary;
+            document.getElementById('art-quote').textContent = art.youtuber_quote ? `"${art.youtuber_quote}"` : '';
+
+            const benchEl = document.getElementById('art-benchmarks');
+            if (art.benchmarks && art.benchmarks.length > 0) {
+                benchEl.style.display = 'grid';
+                benchEl.innerHTML = art.benchmarks.map(b => `
+                    <div class="benchmark-item">
+                        <div class="benchmark-label">${b.metric}</div>
+                        <div class="benchmark-val">${b.score} / 100</div>
+                    </div>
+                `).join('');
+            } else {
+                benchEl.style.display = 'none';
+            }
+
+            document.getElementById('art-pros').innerHTML = (art.pros || []).map(p => `<li>${p}</li>`).join('');
+            document.getElementById('art-cons').innerHTML = (art.cons || []).map(c => `<li>${c}</li>`).join('');
         }
 
         function renderNews(newsList) {
@@ -224,15 +239,15 @@
             `).join('');
         }
 
-        function renderVideos(videoList) {
+        function renderPlaylist(playlistList) {
             const vidEl = document.getElementById('video-container');
-            if (!videoList || videoList.length === 0) {
-                vidEl.innerHTML = '<p style="color:var(--text-dim); font-size:0.9rem; padding:10px;">No watchlist items available.</p>';
+            if (!playlistList || playlistList.length === 0) {
+                vidEl.innerHTML = '<p style="color:var(--text-dim); font-size:0.9rem; padding:10px;">No playlist items available.</p>';
                 return;
             }
-            vidEl.innerHTML = videoList.map(v => `
+            vidEl.innerHTML = playlistList.map((v, index) => `
                 <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(v.search_query_hint)}" target="_blank" class="video-card">
-                    <div class="video-icon">▶</div>
+                    <div class="video-index">${String(index + 1).padStart(2, '0')}</div>
                     <div class="video-info">
                         <h4>${v.title}</h4>
                         <p>${v.channel}</p>
@@ -241,15 +256,55 @@
             `).join('');
         }
 
-        function filterContent() {
-            if (!cachedData || !cachedData.live_news) return;
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            const filteredNews = cachedData.live_news.filter(n => 
-                n.headline.toLowerCase().includes(query) || 
-                n.category.toLowerCase().includes(query) || 
-                n.hot_take.toLowerCase().includes(query)
-            );
-            renderNews(filteredNews);
+        async function handleSearch(event) {
+            if (event.key === 'Enter') {
+                const query = document.getElementById('searchInput').value.trim();
+                if (!query) return;
+
+                // 1. Check local cache first (articles or live news)
+                if (cachedData) {
+                    if (cachedData.articles) {
+                        const match = cachedData.articles.find(a => a.query.toLowerCase() === query.toLowerCase());
+                        if (match) {
+                            renderArticle(match);
+                            return;
+                        }
+                    }
+                    // Filter live news if no direct article match
+                    const filteredNews = (cachedData.live_news || []).filter(n => 
+                        n.headline.toLowerCase().includes(query.toLowerCase()) || 
+                        n.category.toLowerCase().includes(query.toLowerCase()) || 
+                        n.hot_take.toLowerCase().includes(query.toLowerCase())
+                    );
+                    renderNews(filteredNews);
+                }
+
+                // 2. Request on-demand generation from Vercel function if not in local memory
+                document.getElementById('articleSection').classList.add('active');
+                document.getElementById('art-tag').textContent = 'On-Demand Generation';
+                document.getElementById('art-title').textContent = `Generating insight for "${query}"...`;
+                document.getElementById('art-score').textContent = '';
+                document.getElementById('art-summary').textContent = 'Querying Gemini API and analyzing technical consensus...';
+                document.getElementById('art-quote').textContent = '';
+                document.getElementById('art-benchmarks').style.display = 'none';
+                document.getElementById('art-pros').innerHTML = '';
+                document.getElementById('art-cons').innerHTML = '';
+
+                try {
+                    const res = await fetch(`/api/generate?q=${encodeURIComponent(query)}`);
+                    if (!res.ok) throw new Error('Generation failed');
+                    const newArticle = await res.json();
+                    
+                    if (!cachedData.articles) cachedData.articles = [];
+                    cachedData.articles.push(newArticle);
+                    
+                    renderArticle(newArticle);
+                } catch (err) {
+                    console.error(err);
+                    document.getElementById('art-title').textContent = 'Generation Failed';
+                    document.getElementById('art-summary').textContent = 'Unable to generate live article for this query. Try another keyword.';
+                }
+            }
         }
 
         loadData();
