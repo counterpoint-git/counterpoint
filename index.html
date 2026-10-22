@@ -106,7 +106,7 @@
     <main>
         <!-- Search Bar with On-Demand Generation -->
         <div class="search-container">
-            <input type="text" id="searchInput" class="search-bar" placeholder="Search insights or type a topic and press Enter to generate..." onkeydown="handleSearch(event)">
+            <input type="text" id="searchInput" class="search-bar" placeholder="Search insights or type a topic and press Enter..." onkeydown="handleSearch(event)">
         </div>
 
         <!-- Featured / On-Demand Article Display Area -->
@@ -186,7 +186,6 @@
         function renderUI(data) {
             document.getElementById('last-updated').textContent = 'Synced: ' + data.last_updated;
 
-            // Render default featured story if available
             if (data.featured_stories && data.featured_stories.length > 0) {
                 renderArticle(data.featured_stories[0]);
             }
@@ -261,7 +260,6 @@
                 const query = document.getElementById('searchInput').value.trim();
                 if (!query) return;
 
-                // 1. Check local cache first (articles or live news)
                 if (cachedData) {
                     if (cachedData.articles) {
                         const match = cachedData.articles.find(a => a.query.toLowerCase() === query.toLowerCase());
@@ -270,7 +268,6 @@
                             return;
                         }
                     }
-                    // Filter live news if no direct article match
                     const filteredNews = (cachedData.live_news || []).filter(n => 
                         n.headline.toLowerCase().includes(query.toLowerCase()) || 
                         n.category.toLowerCase().includes(query.toLowerCase()) || 
@@ -278,17 +275,6 @@
                     );
                     renderNews(filteredNews);
                 }
-
-                // 2. Request on-demand generation from Vercel function if not in local memory
-                document.getElementById('articleSection').classList.add('active');
-                document.getElementById('art-tag').textContent = 'On-Demand Generation';
-                document.getElementById('art-title').textContent = `Generating insight for "${query}"...`;
-                document.getElementById('art-score').textContent = '';
-                document.getElementById('art-summary').textContent = 'Querying Gemini API and analyzing technical consensus...';
-                document.getElementById('art-quote').textContent = '';
-                document.getElementById('art-benchmarks').style.display = 'none';
-                document.getElementById('art-pros').innerHTML = '';
-                document.getElementById('art-cons').innerHTML = '';
 
                 try {
                     const res = await fetch(`/api/generate?q=${encodeURIComponent(query)}`);
@@ -300,9 +286,7 @@
                     
                     renderArticle(newArticle);
                 } catch (err) {
-                    console.error(err);
-                    document.getElementById('art-title').textContent = 'Generation Failed';
-                    document.getElementById('art-summary').textContent = 'Unable to generate live article for this query. Try another keyword.';
+                    console.error('On-demand fetch error:', err);
                 }
             }
         }
