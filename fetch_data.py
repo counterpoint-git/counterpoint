@@ -1,114 +1,112 @@
 import os
 import json
-import time
 from datetime import datetime, timezone, timedelta
-import feedparser
-from google import genai
-from google.genai import types
-from pydantic import BaseModel, Field
+import urllib.request
+import xml.etree.ElementTree as ET
+import google.generativeai as genai
 
-# 12-Hour Cache Guard: Skip regeneration if data.json is less than 12 hours old
 DATA_FILE = "data.json"
-if os.path.exists(DATA_FILE):
-    try:
-        with open(DATA_FILE, "r", encoding="utf-8") as f:
-            existing_data = json.load(f)
-        # Check file modification time as a secondary guard
+
+def is_cache_fresh():
+    if os.path.exists(DATA_FILE):
         mtime = datetime.fromtimestamp(os.path.getmtime(DATA_FILE), tz=timezone.utc)
         if datetime.now(timezone.utc) - mtime < timedelta(hours=12):
-            print("Data is less than 12 hours old. Skipping regeneration.")
-            exit(0)
-    except Exception:
-        pass
+            return True
+    return False
 
-class BenchmarkItem(BaseModel):
-    metric: str
-    score: int
+def fetch_rss_headlines():
+    rss_urls = [
+        "https://techcrunch.com/feed/",
+        "https://www.theverge.com/rss/index.xml",
+        "https://feeds.feedburner.com/oreilly/radar/atom"
+    ]
+    headlines = []
+    for url in rss_urls:
+        try:
+            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+            with urllib.request.urlopen(req, timeout=5) as response:
+                xml_data = response.read()
+                root = ET.fromstring(xml_data)
+                for item in root.findall('.//item')[:5]:
+                    title = item.find('title')
+                    if title is not None and title.text:
+                        headlines.append(title.text.strip())
+        except Exception:
+            continue
+    return headlines
 
-class CreatorVerdict(BaseModel):
-    product_name: str
-    consensus_score: float
-    verdict_summary: str = Field(description="Write like a real human tech enthusiast talking casually to a friend over coffee, avoiding corporate jargon.")
-    youtuber_quote: str = Field(description="An iconic, realistic quote mimicking a famous tech reviewer like MKBHD or Linus Tech Tips about this product.")
-    benchmarks: list[BenchmarkItem]
-    pros: list[str]
-    cons: list[str]
+def main():
+    if is_cache_fresh():
+        print("Cache is fresh (< 12 hours). Skipping regeneration.")
+        return
 
-class TechNewsItem(BaseModel):
-    category: str
-    headline: str
-    hot_take: str = Field(description="Keep it sounding casual, sharp, and like a human-written hot take.")
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        print("Error: GEMINI_API_KEY not found.")
+        return
 
-class VideoSuggestion(BaseModel):
-    title: str
-    channel: str
-    search_query_hint: str
+    genai.configure(api_key=api_key)
+    model = genai.GenerativeModel("gemini-2.5-flash")
 
-class WebsiteData(BaseModel):
-    last_updated: str
-    featured_review: CreatorVerdict
-    live_news: list[TechNewsItem]
-    video_suggestions: list[VideoSuggestion]
+    headlines = fetch_rss_headlines()
+    context_str = "\n".join(headlines) if headlines else "General major consumer tech updates."
 
-feeds = [
-    "https://www.theverge.com/rss/index.xml",
-    "https://www.tomshardware.com/feeds/all",
-    "https://feeds.arstechnica.com/arstechnica/technology-lab"
-]
+    prompt = f"""
+    You are the lead editor of 'Counterpoint', an independent tech publication.
+    Based on recent tech landscape context, generate a JSON response with exactly this structure:
+    {{
+        "last_updated": "{datetime.now(timezone.utc).strftime('%b %d, %Y - %H:%M UTC')}",
+        "featured_stories": [
+            {{
+                "id": "story-1",
+                "tag": "Deep Dive Editorial",
+                "title": "Compelling Title Here",
+                "summary": "Detailed technical analysis paragraph...",
+                "youtuber_quote": "Direct expert perspective quote.",
+                "consensus_score": 9.1,
+                "benchmarks": [
+                    {{"metric": "Performance", "score": 95}},
+                    {{"metric": "Value", "score": 88}}
+                ],
+                "pros": ["Pro one", "Pro two"],
+                "cons": ["Con one", "Con two"]
+            }}
+        ],
+        "live_news": [
+            {{
+                "id": "news-1",
+                "category": "Hardware",
+                "headline": "Headline summary here",
+                "hot_take": "Sharp analytical perspective."
+            }}
+        ],
+        "video_playlist": [
+            {{
+                "id": "vid-1",
+                "title": "Video title suggestion",
+                "channel": "Channel Name",
+                "search_query_hint": "YouTube search query"
+            }}
+        ]
+    }}
+    Ensure valid JSON only, no markdown backticks outside, pure JSON string. Recent headlines context: {context_str}
+    """
 
-raw_headlines = []
-for url in feeds:
-    parsed = feedparser.parse(url)
-    for entry in parsed.entries[:3]:
-        raw_headlines.append(f"- {entry.title}")
-
-headlines_text = "\n".join(raw_headlines)
-current_time = datetime.now(timezone.utc).strftime("%d %b %Y, %H:%M UTC")
-
-client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
-
-prompt = f"""
-Current time: {current_time}
-Live tech headlines:
-{headlines_text}
-
-Instructions:
-1. Set 'last_updated' to '{current_time}'.
-2. Pick the biggest tech headline for 'featured_review'. Write a casual human review summary, provide a realistic 'youtuber_quote', 4 benchmarks (1-100), 3 pros, and 2 cons.
-3. Choose 3 distinct tech news items for 'live_news' with witty everyday hot takes.
-4. Provide 2 relevant 'video_suggestions' related to current tech trends with title, channel name, and search hint.
-"""
-
-fallback_models = [
-    "gemini-3.8-flash",
-    "gemini-3.7-flash",
-    "gemini-3.6-flash",
-    "gemini-3.5-flash-lite"
-]
-
-response = None
-for model_name in fallback_models:
     try:
-        print(f"Trying engine: {model_name}...")
-        response = client.models.generate_content(
-            model=model_name,
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                response_mime_type="application/json",
-                response_schema=WebsiteData,
-            ),
-        )
-        if response and response.text:
-            print(f"Successfully generated using {model_name}!")
-            break
-    except Exception as err:
-        print(f"Engine {model_name} busy: {err}. Switching backup...")
-        time.sleep(3)
+        response = model.generate_content(prompt)
+        text = response.text.strip()
+        if text.startswith("```json"):
+            text = text[7:-3].strip()
+        elif text.startswith("```"):
+            text = text[3:-3].strip()
+            
+        data = json.loads(text)
+        
+        with open(DATA_FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=4, ensure_ascii=False)
+        print("Successfully updated data.json")
+    except Exception as e:
+        print(f"Generation failed: {e}")
 
-if not response or not response.text:
-    raise RuntimeError("All backup models are currently busy.")
-
-with open(DATA_FILE, "w", encoding="utf-8") as f:
-    f.write(response.text)
-
-print("data.json updated successfully!")
+if __name__ == "__main__":
+    main()
