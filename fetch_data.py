@@ -7,18 +7,13 @@ import google.generativeai as genai
 
 DATA_FILE = "data.json"
 
-def is_cache_fresh():
-    if os.path.exists(DATA_FILE):
-        mtime = datetime.fromtimestamp(os.path.getmtime(DATA_FILE), tz=timezone.utc)
-        if datetime.now(timezone.utc) - mtime < timedelta(hours=12):
-            return True
-    return False
-
 def fetch_rss_headlines():
     rss_urls = [
         "https://techcrunch.com/feed/",
         "https://www.theverge.com/rss/index.xml",
-        "https://feeds.feedburner.com/oreilly/radar/atom"
+        "https://feeds.feedburner.com/oreilly/radar/atom",
+        "https://www.engadget.com/rss.xml",
+        "https://gizmodo.com/feed"
     ]
     headlines = []
     for url in rss_urls:
@@ -27,7 +22,7 @@ def fetch_rss_headlines():
             with urllib.request.urlopen(req, timeout=5) as response:
                 xml_data = response.read()
                 root = ET.fromstring(xml_data)
-                for item in root.findall('.//item')[:5]:
+                for item in root.findall('.//item')[:15]:
                     title = item.find('title')
                     if title is not None and title.text:
                         headlines.append(title.text.strip())
@@ -36,10 +31,6 @@ def fetch_rss_headlines():
     return headlines
 
 def main():
-    if is_cache_fresh():
-        print("Cache is fresh (< 12 hours). Skipping regeneration.")
-        return
-
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         print("Error: GEMINI_API_KEY not found.")
@@ -49,35 +40,21 @@ def main():
     model = genai.GenerativeModel("gemini-2.5-flash")
 
     headlines = fetch_rss_headlines()
-    context_str = "\n".join(headlines) if headlines else "General major consumer tech updates."
+    context_str = "\n".join(headlines) if headlines else "General major consumer tech updates, silicon releases, AI models, mobile hardware, and operating systems."
 
     prompt = f"""
     You are the lead editor of 'Counterpoint', an independent tech publication.
-    Based on recent tech landscape context, generate a JSON response with exactly this structure:
+    Based on the recent tech headlines and trends provided below, generate a comprehensive dataset containing EXACTLY 100 items in the 'featured_stories' array covering a diverse range of hardware, software, AI, and consumer tech topics.
+    
+    Return a valid JSON object only, with NO markdown backticks outside, pure JSON string matching this exact structure:
     {{
         "last_updated": "{datetime.now(timezone.utc).strftime('%b %d, %Y - %H:%M UTC')}",
         "featured_stories": [
             {{
                 "id": "story-1",
                 "tag": "Deep Dive Editorial",
-                "title": "Compelling Title Here",
-                "summary": "Detailed technical analysis paragraph...",
-                "youtuber_quote": "Direct expert perspective quote.",
-                "consensus_score": 9.1,
-                "benchmarks": [
-                    {{"metric": "Performance", "score": 95}},
-                    {{"metric": "Value", "score": 88}}
-                ],
-                "pros": ["Pro one", "Pro two"],
-                "cons": ["Con one", "Con two"]
-            }}
-        ],
-        "live_news": [
-            {{
-                "id": "news-1",
-                "category": "Hardware",
-                "headline": "Headline summary here",
-                "hot_take": "Sharp analytical perspective."
+                "title": "Compelling Technical Title 1",
+                "summary": "Detailed technical analysis summary paragraph explaining the headline..."
             }}
         ],
         "video_playlist": [
@@ -89,7 +66,8 @@ def main():
             }}
         ]
     }}
-    Ensure valid JSON only, no markdown backticks outside, pure JSON string. Recent headlines context: {context_str}
+    
+    Ensure there are precisely 100 items in the 'featured_stories' array covering distinct consumer tech topics. Recent headlines context: {context_str}
     """
 
     try:
@@ -104,7 +82,7 @@ def main():
         
         with open(DATA_FILE, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=4, ensure_ascii=False)
-        print("Successfully updated data.json")
+        print("Successfully updated data.json with 100 articles")
     except Exception as e:
         print(f"Generation failed: {e}")
 
