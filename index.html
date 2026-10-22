@@ -29,7 +29,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: var(--bg); color: var(--text); line-height: 1.6; padding-bottom: 50px; }
 
-        header { max-width: 800px; margin: 0 auto; padding: 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: var(--bg); backdrop-filter: blur(12px); z-index: 100; border-bottom: 1px solid var(--border); }
+        header { max-width: 1000px; margin: 0 auto; padding: 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: var(--bg); backdrop-filter: blur(12px); z-index: 100; border-bottom: 1px solid var(--border); }
         .logo-area { display: flex; align-items: center; gap: 10px; }
         .logo-area img { height: 30px; width: auto; object-fit: contain; }
         .logo-area h1 { font-size: 1.2rem; font-weight: 700; letter-spacing: -0.5px; }
@@ -38,40 +38,19 @@
         #last-updated { font-size: 0.75rem; color: var(--text-dim); }
         .theme-btn { background: var(--card-bg); color: var(--text); border: 1px solid var(--border); padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 0.75rem; font-weight: 600; }
 
-        main { max-width: 800px; margin: 20px auto; padding: 0 16px; display: grid; gap: 24px; }
+        main { max-width: 1000px; margin: 20px auto; padding: 0 16px; display: grid; gap: 24px; }
 
-        /* Section Headings */
         h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 12px; letter-spacing: -0.3px; color: var(--text-dim); text-transform: uppercase; }
 
-        /* Featured Article Card */
-        .article-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); display: none; }
-        .article-card.active { display: block; }
-        .article-tag { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.2px; color: var(--accent); font-weight: 700; margin-bottom: 8px; display: block; }
-        .article-title { font-size: 1.8rem; font-weight: 800; line-height: 1.25; margin-bottom: 12px; letter-spacing: -0.5px; }
-        .article-meta { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 14px; margin-bottom: 20px; font-size: 0.8rem; color: var(--text-dim); }
-        .article-body { font-size: 1.05rem; line-height: 1.7; color: var(--text); margin-bottom: 20px; }
-        .quote-box { background: var(--accent-glow); border-left: 3px solid var(--accent); padding: 14px 18px; border-radius: 0 12px 12px 0; font-style: italic; font-size: 0.95rem; margin-bottom: 20px; }
+        /* 50 Rows of Side-by-Side Rectangular Article Cards (100 total) */
+        .articles-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        @media(max-width: 768px) { .articles-grid { grid-template-columns: 1fr; } }
 
-        .benchmarks-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 20px; }
-        .benchmark-item { background: var(--bg); padding: 10px 14px; border-radius: 12px; border: 1px solid var(--border); }
-        .benchmark-label { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; }
-        .benchmark-val { font-weight: 700; font-size: 1rem; }
-
-        .pros-cons { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; background: var(--bg); padding: 16px; border-radius: 12px; border: 1px solid var(--border); }
-        @media(max-width: 600px) { .pros-cons { grid-template-columns: 1fr; } }
-        .list-title { font-weight: 700; font-size: 0.8rem; margin-bottom: 8px; text-transform: uppercase; }
-        ul { list-style-type: none; }
-        li { font-size: 0.85rem; margin-bottom: 6px; padding-left: 18px; position: relative; color: var(--text-dim); }
-        .pros li::before { content: "+"; position: absolute; left: 0; color: #10b981; font-weight: bold; }
-        .cons li::before { content: "-"; position: absolute; left: 0; color: #ef4444; font-weight: bold; }
-
-        /* News Grid */
-        .news-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
-        .news-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; display: flex; flex-direction: column; justify-content: space-between; text-decoration: none; color: inherit; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
-        .news-card:hover { border-color: var(--accent); transform: translateY(-2px); transition: transform 0.2s ease, border-color 0.2s ease; }
-        .news-category { font-size: 0.7rem; color: var(--accent); font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
-        .news-headline { font-size: 0.95rem; font-weight: 700; margin-bottom: 10px; line-height: 1.35; }
-        .news-take { font-size: 0.8rem; color: var(--text-dim); border-top: 1px solid var(--border); padding-top: 8px; }
+        .article-rect-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; justify-content: space-between; text-decoration: none; color: inherit; box-shadow: 0 4px 12px rgba(0,0,0,0.02); min-height: 150px; }
+        .article-rect-card:hover { border-color: var(--accent); transform: translateY(-2px); transition: transform 0.2s ease, border-color 0.2s ease; }
+        .article-tag { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1.2px; color: var(--accent); font-weight: 700; margin-bottom: 6px; display: block; }
+        .article-headline { font-size: 1rem; font-weight: 800; line-height: 1.35; margin-bottom: 8px; letter-spacing: -0.3px; }
+        .article-subheadline { font-size: 0.8rem; color: var(--text-dim); line-height: 1.4; border-top: 1px solid var(--border); padding-top: 8px; }
 
         /* Video Playlist Feed */
         .video-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
@@ -81,7 +60,7 @@
         .video-info h4 { font-size: 0.9rem; font-weight: 700; margin-bottom: 2px; }
         .video-info p { font-size: 0.75rem; color: var(--text-dim); }
 
-        footer { max-width: 800px; margin: 40px auto 0; padding: 20px; border-top: 1px solid var(--border); text-align: center; font-size: 0.8rem; color: var(--text-dim); display: flex; flex-direction: column; gap: 4px; }
+        footer { max-width: 1000px; margin: 40px auto 0; padding: 20px; border-top: 1px solid var(--border); text-align: center; font-size: 0.8rem; color: var(--text-dim); display: flex; flex-direction: column; gap: 4px; }
         footer a { color: var(--accent); text-decoration: none; }
     </style>
 </head>
@@ -99,36 +78,11 @@
     </header>
 
     <main>
-        <!-- Featured / Deep Dive Article Display Area -->
-        <section class="article-card" id="articleSection">
-            <span class="article-tag" id="art-tag">Deep Dive Editorial</span>
-            <h1 class="article-title" id="art-title"></h1>
-            <div class="article-meta">
-                <span id="art-author">Editorial Board</span>
-                <span id="art-score" style="font-weight: 700; color: var(--accent);"></span>
-            </div>
-            <div class="article-body" id="art-summary"></div>
-            <div class="quote-box" id="art-quote"></div>
-            
-            <div class="benchmarks-grid" id="art-benchmarks"></div>
-            
-            <div class="pros-cons">
-                <div>
-                    <div class="list-title" style="color: #10b981;">Advantages</div>
-                    <ul class="pros" id="art-pros"></ul>
-                </div>
-                <div>
-                    <div class="list-title" style="color: #ef4444;">Limitations</div>
-                    <ul class="cons" id="art-cons"></ul>
-                </div>
-            </div>
-        </section>
-
-        <!-- Live News Briefings -->
+        <!-- 100 Articles Grid (50 rows x 2 side-by-side) -->
         <section>
-            <h2>Live Tech Briefings</h2>
-            <div class="news-grid" id="news-container">
-                <!-- Dynamically populated -->
+            <h2>Tech Briefings & Analyses</h2>
+            <div class="articles-grid" id="articles-container">
+                <!-- Dynamically populated from data.json -->
             </div>
         </section>
 
@@ -176,56 +130,25 @@
         function renderUI(data) {
             document.getElementById('last-updated').textContent = 'Synced: ' + data.last_updated;
 
-            if (data.featured_stories && data.featured_stories.length > 0) {
-                renderArticle(data.featured_stories[0]);
-            }
-
-            renderNews(data.live_news);
-            renderPlaylist(data.video_playlist);
-        }
-
-        function renderArticle(art) {
-            const card = document.getElementById('articleSection');
-            card.classList.add('active');
-
-            document.getElementById('art-tag').textContent = art.tag || 'Deep Dive Editorial';
-            document.getElementById('art-title').textContent = art.title || art.query;
-            document.getElementById('art-score').textContent = art.consensus_score ? `Score: ${art.consensus_score} / 10` : '';
-            document.getElementById('art-summary').textContent = art.summary;
-            document.getElementById('art-quote').textContent = art.youtuber_quote ? `"${art.youtuber_quote}"` : '';
-
-            const benchEl = document.getElementById('art-benchmarks');
-            if (art.benchmarks && art.benchmarks.length > 0) {
-                benchEl.style.display = 'grid';
-                benchEl.innerHTML = art.benchmarks.map(b => `
-                    <div class="benchmark-item">
-                        <div class="benchmark-label">${b.metric}</div>
-                        <div class="benchmark-val">${b.score} / 100</div>
-                    </div>
-                `).join('');
+            // Render 100 articles (featured_stories) in side-by-side rectangular rows
+            const articlesEl = document.getElementById('articles-container');
+            const stories = data.featured_stories || [];
+            
+            if (stories.length === 0) {
+                articlesEl.innerHTML = '<p style="color:var(--text-dim); padding:10px;">No articles available.</p>';
             } else {
-                benchEl.style.display = 'none';
+                articlesEl.innerHTML = stories.map(s => `
+                    <a href="https://www.google.com/search?q=${encodeURIComponent(s.title)}" target="_blank" class="article-rect-card">
+                        <div>
+                            <span class="article-tag">${s.tag || 'Deep Dive'}</span>
+                            <div class="article-headline">${s.title}</div>
+                        </div>
+                        <div class="article-subheadline">${s.summary}</div>
+                    </a>
+                `).join('');
             }
 
-            document.getElementById('art-pros').innerHTML = (art.pros || []).map(p => `<li>${p}</li>`).join('');
-            document.getElementById('art-cons').innerHTML = (art.cons || []).map(c => `<li>${c}</li>`).join('');
-        }
-
-        function renderNews(newsList) {
-            const newsEl = document.getElementById('news-container');
-            if (!newsList || newsList.length === 0) {
-                newsEl.innerHTML = '<p style="color:var(--text-dim); font-size:0.9rem; padding:10px;">No matching briefings found.</p>';
-                return;
-            }
-            newsEl.innerHTML = newsList.map(n => `
-                <a href="https://www.google.com/search?q=${encodeURIComponent(n.headline)}" target="_blank" class="news-card">
-                    <div>
-                        <div class="news-category">${n.category}</div>
-                        <div class="news-headline">${n.headline}</div>
-                    </div>
-                    <div class="news-take">Insight: ${n.hot_take}</div>
-                </a>
-            `).join('');
+            renderPlaylist(data.video_playlist);
         }
 
         function renderPlaylist(playlistList) {
@@ -236,7 +159,7 @@
             }
             vidEl.innerHTML = playlistList.map((v, index) => `
                 <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(v.search_query_hint)}" target="_blank" class="video-card">
-                    <div class="video-index">${String(index + 1).padStart(2, '0')}<div>
+                    <div class="video-index">${String(index + 1).padStart(2, '0')}</div>
                     <div class="video-info">
                         <h4>${v.title}</h4>
                         <p>${v.channel}</p>
