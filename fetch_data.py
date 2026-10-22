@@ -45,7 +45,7 @@ for url in feeds:
 headlines_text = "\n".join(raw_headlines)
 current_time = datetime.now(timezone.utc).strftime("%d %b %Y, %H:%M UTC")
 
-# 3. Connect to Gemini API with automatic retry
+# 3. Connect to Gemini API
 client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
 prompt = f"""
@@ -59,11 +59,15 @@ Tasks:
 3. Pick 3 distinct tech stories for 'live_news'. Provide a short category, a punchy headline, and a witty, honest 1-sentence 'hot_take' on why it matters to everyday consumers.
 """
 
+# Try high-availability production models in order
+candidate_models = ["gemini-1.5-flash", "gemini-2.0-flash", "gemini-1.5-pro"]
 response = None
-for attempt in range(4):
+
+for model_name in candidate_models:
     try:
+        print(f"Trying model: {model_name}...")
         response = client.models.generate_content(
-            model="gemini-3.8-flash",
+            model=model_name,
             contents=prompt,
             config=types.GenerateContentConfig(
                 response_mime_type="application/json",
@@ -71,13 +75,14 @@ for attempt in range(4):
             ),
         )
         if response and response.text:
+            print(f"Successfully generated using {model_name}!")
             break
     except Exception as e:
-        print(f"Attempt {attempt + 1} hit temporary server delay: {e}. Retrying in 5 seconds...")
-        time.sleep(5)
+        print(f"Model {model_name} failed: {e}. Trying next fallback...")
+        time.sleep(2)
 
 if not response or not response.text:
-    raise RuntimeError("Failed to get response from Gemini after 4 attempts.")
+    raise RuntimeError("All candidate models failed.")
 
 # 4. Write data to data.json
 with open("data.json", "w", encoding="utf-8") as f:
