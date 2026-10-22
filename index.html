@@ -1,145 +1,218 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Counterpoint // Tech Verdicts</title>
-  <style>
-    :root {
-      --bg: #090d16;
-      --card: rgba(22, 31, 48, 0.85);
-      --border: rgba(255, 255, 255, 0.08);
-      --accent: #38bdf8;
-      --green: #4ade80;
-      --red: #f87171;
-      --text: #f1f5f9;
-      --muted: #94a3b8;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: system-ui, -apple-system, sans-serif;
-      padding: 24px;
-      max-width: 1000px;
-      margin: auto;
-      line-height: 1.5;
-    }
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-bottom: 16px;
-      margin-bottom: 24px;
-      border-bottom: 1px solid var(--border);
-    }
-    .logo { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
-    .logo span { color: var(--accent); }
-    .status { font-size: 13px; color: var(--muted); background: #1e293b; padding: 6px 12px; border-radius: 20px; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Counterpoint — Human Tech Perspectives</title>
+    <style>
+        :root {
+            --bg: #090d16;
+            --card-bg: #111827;
+            --text: #f3f4f6;
+            --text-dim: #9ca3af;
+            --border: #1f2937;
+            --accent: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.15);
+        }
 
-    .hero-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 24px;
-      margin-bottom: 28px;
-    }
-    .hero-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 16px; }
-    .hero-title { font-size: 24px; font-weight: 800; }
-    .score-box { background: #0f172a; border: 1px solid var(--accent); padding: 10px 18px; border-radius: 10px; text-align: center; }
-    .score-num { font-size: 28px; font-weight: 900; color: var(--accent); }
-    .score-label { font-size: 11px; color: var(--muted); text-transform: uppercase; }
-    .summary-text { color: #cbd5e1; margin-bottom: 20px; font-size: 15px; }
+        body.light-mode {
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #0f172a;
+            --text-dim: #64748b;
+            --border: #e2e8f0;
+            --accent: #2563eb;
+            --accent-glow: rgba(37, 99, 235, 0.08);
+        }
 
-    .bench-row { display: flex; align-items: center; gap: 12px; font-size: 13px; margin-bottom: 10px; }
-    .bench-name { width: 140px; color: var(--muted); }
-    .bench-bar-bg { flex: 1; height: 8px; background: #0f172a; border-radius: 6px; overflow: hidden; }
-    .bench-bar-fill { height: 100%; background: var(--accent); border-radius: 6px; }
-    .bench-val { width: 40px; text-align: right; font-weight: 700; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; transition: background 0.2s ease, color 0.2s ease; }
+        body { background-color: var(--bg); color: var(--text); line-height: 1.6; padding-bottom: 60px; }
 
-    .pros-cons { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-top: 20px; }
-    .box { background: #0f172a; padding: 14px; border-radius: 10px; border: 1px solid var(--border); font-size: 14px; }
-    .box h4 { margin-bottom: 8px; font-size: 13px; text-transform: uppercase; }
-    .pros h4 { color: var(--green); }
-    .cons h4 { color: var(--red); }
-    .box ul { list-style: none; color: #cbd5e1; }
-    .box li { margin-bottom: 6px; }
+        header { display: flex; justify-content: space-between; align-items: center; max-width: 1000px; margin: 0 auto; padding: 24px 20px; border-bottom: 1px solid var(--border); }
+        .logo-area { display: flex; align-items: center; gap: 12px; }
+        .logo-area img { height: 32px; width: auto; object-fit: contain; }
+        .logo-area h1 { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.5px; }
 
-    .section-title { font-size: 18px; font-weight: 700; margin-bottom: 14px; }
-    .news-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
-    .news-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
-    .news-cat { font-size: 11px; color: var(--accent); text-transform: uppercase; font-weight: 700; margin-bottom: 6px; }
-    .news-card h3 { font-size: 15px; margin-bottom: 10px; }
-    .news-take { font-size: 13px; color: var(--muted); background: #0f172a; padding: 10px; border-radius: 6px; border-left: 3px solid var(--accent); }
-  </style>
+        .header-controls { display: flex; align-items: center; gap: 16px; }
+        #last-updated { font-size: 0.8rem; color: var(--text-dim); }
+        .theme-btn { background: var(--card-bg); color: var(--text); border: 1px solid var(--border); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 500; }
+        .theme-btn:hover { border-color: var(--accent); }
+
+        main { max-width: 1000px; margin: 30px auto; padding: 0 20px; display: grid; gap: 30px; }
+
+        .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
+        h2 { font-size: 1.1rem; margin-bottom: 16px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* Featured Review */
+        .review-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        .product-title { font-size: 1.5rem; font-weight: 700; }
+        .score-badge { background: var(--accent-glow); color: var(--accent); border: 1px solid var(--accent); padding: 4px 10px; border-radius: 20px; font-weight: 700; font-size: 0.9rem; }
+        .summary-text { font-size: 1.05rem; color: var(--text); margin-bottom: 20px; }
+        
+        .quote-box { background: var(--accent-glow); border-left: 3px solid var(--accent); padding: 12px 16px; border-radius: 0 8px 8px 0; font-style: italic; font-size: 0.95rem; margin-bottom: 20px; color: var(--text); }
+
+        .benchmarks-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 20px; }
+        .benchmark-item { background: var(--bg); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border); }
+        .benchmark-label { font-size: 0.8rem; color: var(--text-dim); }
+        .benchmark-val { font-weight: 700; font-size: 1rem; }
+
+        .pros-cons { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @media(max-width: 600px) { .pros-cons { grid-template-columns: 1fr; } }
+        .list-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 8px; }
+        ul { list-style-type: none; }
+        li { font-size: 0.9rem; margin-bottom: 6px; padding-left: 18px; position: relative; color: var(--text-dim); }
+        .pros li::before { content: "✓"; position: absolute; left: 0; color: #10b981; font-weight: bold; }
+        .cons li::before { content: "✕"; position: absolute; left: 0; color: #ef4444; font-weight: bold; }
+
+        /* Live News Grid */
+        .news-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+        .news-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; }
+        .news-category { font-size: 0.75rem; color: var(--accent); font-weight: 600; text-transform: uppercase; margin-bottom: 6px; }
+        .news-headline { font-size: 0.95rem; font-weight: 600; margin-bottom: 10px; }
+        .news-take { font-size: 0.85rem; color: var(--text-dim); border-top: 1px solid var(--border); padding-top: 8px; }
+
+        /* Video Suggestions */
+        .video-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+        .video-card { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px; display: flex; align-items: center; gap: 12px; }
+        .video-icon { font-size: 1.5rem; background: var(--card-bg); padding: 10px; border-radius: 6px; border: 1px solid var(--border); }
+        .video-info h4 { font-size: 0.9rem; font-weight: 600; margin-bottom: 2px; }
+        .video-info p { font-size: 0.75rem; color: var(--text-dim); }
+
+        footer { max-width: 1000px; margin: 40px auto 0; padding: 20px; border-top: 1px solid var(--border); text-align: center; font-size: 0.85rem; color: var(--text-dim); display: flex; flex-direction: column; gap: 6px; }
+        footer a { color: var(--accent); text-decoration: none; }
+    </style>
 </head>
 <body>
 
-  <header>
-    <div class="logo">COUNTER<span>POINT</span></div>
-    <div class="status" id="last-updated">Checking data...</div>
-  </header>
+    <header>
+        <div class="logo-area">
+            <!-- Upload your Canva logo as logo.png in your repo root, or it falls back gracefully -->
+            <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
+            <h1>Counterpoint</h1>
+        </div>
+        <div class="header-controls">
+            <span id="last-updated">Loading sync...</span>
+            <button class="theme-btn" id="theme-toggle" onclick="toggleTheme()">🌙 Dark</button>
+        </div>
+    </header>
 
-  <section class="hero-card">
-    <div class="hero-top">
-      <h1 class="hero-title" id="prod-name">Loading review...</h1>
-      <div class="score-box">
-        <div class="score-num" id="prod-score">--</div>
-        <div class="score-label">Verdict</div>
-      </div>
-    </div>
-    <p class="summary-text" id="prod-summary">Connecting to data...</p>
+    <main>
+        <!-- Featured Review -->
+        <section class="card">
+            <h2>Featured Verdict</h2>
+            <div class="review-header">
+                <div class="product-title" id="rev-title">Loading product...</div>
+                <div class="score-badge" id="rev-score">--/10</div>
+            </div>
+            <p class="summary-text" id="rev-summary">Fetching expert breakdown...</p>
+            <div class="quote-box" id="rev-quote">"..."</div>
+            <div class="benchmarks-grid" id="rev-benchmarks"></div>
+            <div class="pros-cons">
+                <div>
+                    <div class="list-title" style="color: #10b981;">Pros</div>
+                    <ul class="pros" id="rev-pros"></ul>
+                </div>
+                <div>
+                    <div class="list-title" style="color: #ef4444;">Cons</div>
+                    <ul class="cons" id="rev-cons"></ul>
+                </div>
+            </div>
+        </section>
 
-    <div id="benchmarks-list"></div>
+        <!-- Live News -->
+        <section>
+            <h2>Live Tech News & Takes</h2>
+            <div class="news-grid" id="news-container">
+                <!-- Dynamically loaded -->
+            </div>
+        </section>
 
-    <div class="pros-cons">
-      <div class="box pros">
-        <h4>+ Reviewer Praises</h4>
-        <ul id="pros-list"></ul>
-      </div>
-      <div class="box cons">
-        <h4>- Flaws & Dealbreakers</h4>
-        <ul id="cons-list"></ul>
-      </div>
-    </div>
-  </section>
+        <!-- Video Suggestions -->
+        <section>
+            <h2>Recommended Watchlist</h2>
+            <div class="video-grid" id="video-container">
+                <!-- Dynamically loaded -->
+            </div>
+        </section>
+    </main>
 
-  <h2 class="section-title">Latest Hardware Radar</h2>
-  <section class="news-grid" id="news-grid"></section>
+    <footer>
+        <p>Built with precision by <strong>Ayush Shelake</strong> | Altrex Media Group™</p>
+        <p>Contact: <a href="mailto:ayushshelake14@gmail.com">ayushshelake14@gmail.com</a></p>
+    </footer>
 
-  <script>
-    fetch('./data.json?t=' + new Date().getTime())
-      .then(res => res.json())
-      .then(data => {
-        document.getElementById('last-updated').innerText = data.last_updated;
+    <script>
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            const isLight = document.body.classList.contains('light-mode');
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+            document.getElementById('theme-toggle').textContent = isLight ? '☀️ Light' : '🌙 Dark';
+        }
 
-        const rev = data.featured_review;
-        document.getElementById('prod-name').innerText = rev.product_name;
-        document.getElementById('prod-score').innerText = rev.consensus_score + "/10";
-        document.getElementById('prod-summary').innerText = rev.verdict_summary;
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.classList.add('light-mode');
+            document.getElementById('theme-toggle').textContent = '☀️ Light';
+        }
 
-        document.getElementById('benchmarks-list').innerHTML = rev.benchmarks.map(b => `
-          <div class="bench-row">
-            <div class="bench-name">${b.metric}</div>
-            <div class="bench-bar-bg"><div class="bench-bar-fill" style="width: ${b.score}%"></div></div>
-            <div class="bench-val">${b.score}%</div>
-          </div>
-        `).join('');
+        async function loadData() {
+            try {
+                const res = await fetch('data.json?t=' + Date.now());
+                if (!res.ok) throw new Error('Failed to load data');
+                const data = await res.json();
 
-        document.getElementById('pros-list').innerHTML = rev.pros.map(p => `<li>• ${p}</li>`).join('');
-        document.getElementById('cons-list').innerHTML = rev.cons.map(c => `<li>• ${c}</li>`).join('');
+                document.getElementById('last-updated').textContent = 'Updated: ' + data.last_updated;
 
-        document.getElementById('news-grid').innerHTML = data.live_news.map(n => `
-          <div class="news-card">
-            <div class="news-cat">${n.category}</div>
-            <h3>${n.headline}</h3>
-            <div class="news-take"><strong>Take:</strong> ${n.hot_take}</div>
-          </div>
-        `).join('');
-      })
-      .catch(() => {
-        document.getElementById('prod-summary').innerText = "Waiting for data.json to be added next...";
-      });
-  </script>
+                // Featured Review
+                const rev = data.featured_review;
+                document.getElementById('rev-title').textContent = rev.product_name;
+                document.getElementById('rev-score').textContent = rev.consensus_score + ' / 10';
+                document.getElementById('rev-summary').textContent = rev.verdict_summary;
+                document.getElementById('rev-quote').textContent = `"${rev.youtuber_quote}"`;
+
+                const benchEl = document.getElementById('rev-benchmarks');
+                benchEl.innerHTML = rev.benchmarks.map(b => `
+                    <div class="benchmark-item">
+                        <div class="benchmark-label">${b.metric}</div>
+                        <div class="benchmark-val">${b.score} / 100</div>
+                    </div>
+                `).join('');
+
+                document.getElementById('rev-pros').innerHTML = rev.pros.map(p => `<li>${p}</li>`).join('');
+                document.getElementById('rev-cons').innerHTML = rev.cons.map(c => `<li>${c}</li>`).join('');
+
+                // Live News
+                const newsEl = document.getElementById('news-container');
+                newsEl.innerHTML = data.live_news.map(n => `
+                    <div class="news-card">
+                        <div>
+                            <div class="news-category">${n.category}</div>
+                            <div class="news-headline">${n.headline}</div>
+                        </div>
+                        <div class="news-take">💡 ${n.hot_take}</div>
+                    </div>
+                `).join('');
+
+                // Video Suggestions
+                const vidEl = document.getElementById('video-container');
+                vidEl.innerHTML = data.video_suggestions.map(v => `
+                    <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(v.search_query_hint)}" target="_blank" style="text-decoration: none; color: inherit;">
+                        <div class="video-card">
+                            <div class="video-icon">▶</div>
+                            <div class="video-info">
+                                <h4>${v.title}</h4>
+                                <p>${v.channel}</p>
+                            </div>
+                        </div>
+                    </a>
+                `).join('');
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('last-updated').textContent = 'Sync pending...';
+            }
+        }
+
+        loadData();
+    </script>
 </body>
 </html>
