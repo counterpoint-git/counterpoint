@@ -1,11 +1,12 @@
 import os
+import time
 from datetime import datetime, timezone
 import feedparser
 from google import genai
 from google.genai import types
 from pydantic import BaseModel
 
-# Structure that matches your index.html exactly
+# 1. Structured data schema matching index.html
 class BenchmarkItem(BaseModel):
     metric: str
     score: int
@@ -28,7 +29,7 @@ class WebsiteData(BaseModel):
     featured_review: CreatorVerdict
     live_news: list[TechNewsItem]
 
-# Grab live headlines from top tech sites
+# 2. Collect headlines from tech feeds
 feeds = [
     "https://www.theverge.com/rss/index.xml",
     "https://www.tomshardware.com/feeds/all",
@@ -44,7 +45,7 @@ for url in feeds:
 headlines_text = "\n".join(raw_headlines)
 current_time = datetime.now(timezone.utc).strftime("%d %b %Y, %H:%M UTC")
 
-# Connect to Gemini using the secret key
+# 3. Connect to Gemini API with automatic retry
 client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
 prompt = f"""
@@ -58,15 +59,27 @@ Tasks:
 3. Pick 3 distinct tech stories for 'live_news'. Provide a short category, a punchy headline, and a witty, honest 1-sentence 'hot_take' on why it matters to everyday consumers.
 """
 
-response = client.models.generate_content(
-    model="gemini-3.8-pro",
-    contents=prompt,
-    config=types.GenerateContentConfig(
-        response_mime_type="application/json",
-        response_schema=WebsiteData,
-    ),
-)
+response = None
+for attempt in range(4):
+    try:
+        response = client.models.generate_content(
+            model="gemini-3.8-flash",
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+                response_schema=WebsiteData,
+            ),
+        )
+        if response and response.text:
+            break
+    except Exception as e:
+        print(f"Attempt {attempt + 1} hit temporary server delay: {e}. Retrying in 5 seconds...")
+        time.sleep(5)
 
+if not response or not response.text:
+    raise RuntimeError("Failed to get response from Gemini after 4 attempts.")
+
+# 4. Write data to data.json
 with open("data.json", "w", encoding="utf-8") as f:
     f.write(response.text)
 
