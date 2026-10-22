@@ -4,9 +4,8 @@ from datetime import datetime, timezone
 import feedparser
 from google import genai
 from google.genai import types
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
-# 1. Structured data schema matching index.html
 class BenchmarkItem(BaseModel):
     metric: str
     score: int
@@ -14,7 +13,7 @@ class BenchmarkItem(BaseModel):
 class CreatorVerdict(BaseModel):
     product_name: str
     consensus_score: float
-    verdict_summary: str
+    verdict_summary: str = Field(description="Write like a real human tech reviewer talking to a friend, avoiding robotic jargon.")
     benchmarks: list[BenchmarkItem]
     pros: list[str]
     cons: list[str]
@@ -22,14 +21,13 @@ class CreatorVerdict(BaseModel):
 class TechNewsItem(BaseModel):
     category: str
     headline: str
-    hot_take: str
+    hot_take: str = Field(description="Keep it sounding casual, sharp, and like a human-written hot take.")
 
 class WebsiteData(BaseModel):
     last_updated: str
     featured_review: CreatorVerdict
     live_news: list[TechNewsItem]
 
-# 2. Collect headlines from tech feeds
 feeds = [
     "https://www.theverge.com/rss/index.xml",
     "https://www.tomshardware.com/feeds/all",
@@ -39,13 +37,12 @@ feeds = [
 raw_headlines = []
 for url in feeds:
     parsed = feedparser.parse(url)
-    for entry in parsed.entries[:4]:
+    for entry in parsed.entries[:3]:
         raw_headlines.append(f"- {entry.title}")
 
 headlines_text = "\n".join(raw_headlines)
 current_time = datetime.now(timezone.utc).strftime("%d %b %Y, %H:%M UTC")
 
-# 3. Connect to Gemini API
 client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
 prompt = f"""
@@ -53,19 +50,24 @@ Current time: {current_time}
 Live tech headlines:
 {headlines_text}
 
-Tasks:
+Instructions for you:
 1. Set 'last_updated' to '{current_time}'.
-2. Pick the biggest hardware or gadget topic from these headlines for 'featured_review'. Provide a realistic consensus_score out of 10, a punchy 2-sentence verdict_summary, 4 benchmark metrics (scored 1-100), 3 pros, and 2 cons.
-3. Pick 3 distinct tech stories for 'live_news'. Provide a short category, a punchy headline, and a witty, honest 1-sentence 'hot_take' on why it matters to everyday consumers.
+2. Pick the biggest tech headline for 'featured_review'. Write the summary like a real human tech enthusiast sharing an honest opinion over coffee—no stiff corporate language. Include 4 clean benchmark metrics (1-100), 3 pros, and 2 cons.
+3. Choose 3 distinct tech news items for 'live_news'. Write the hot takes using punchy, casual, everyday human phrasing.
 """
 
-# Try high-availability production models in order
-candidate_models = ["gemini-1.5-flash", "gemini-2.0-flash", "gemini-1.5-pro"]
-response = None
+# Automatic fallback queue covering active models to prevent downtime
+fallback_models = [
+    "gemini-3.8-flash",
+    "gemini-3.7-flash",
+    "gemini-3.6-flash",
+    "gemini-3.5-flash-lite"
+]
 
-for model_name in candidate_models:
+response = None
+for model_name in fallback_models:
     try:
-        print(f"Trying model: {model_name}...")
+        print(f"Trying engine: {model_name}...")
         response = client.models.generate_content(
             model=model_name,
             contents=prompt,
@@ -77,15 +79,14 @@ for model_name in candidate_models:
         if response and response.text:
             print(f"Successfully generated using {model_name}!")
             break
-    except Exception as e:
-        print(f"Model {model_name} failed: {e}. Trying next fallback...")
-        time.sleep(2)
+    except Exception as err:
+        print(f"Engine {model_name} busy: {err}. Switching backup...")
+        time.sleep(3)
 
 if not response or not response.text:
-    raise RuntimeError("All candidate models failed.")
+    raise RuntimeError("All backup models are currently busy. Try again shortly.")
 
-# 4. Write data to data.json
 with open("data.json", "w", encoding="utf-8") as f:
     f.write(response.text)
 
-print("data.json successfully updated by Gemini!")
+print("data.json updated successfully!")
